@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getParticipationDays } from "@/lib/calculations";
 import { getSchedule, saveSchedule } from "@/lib/schedule-storage";
 import styles from "./page.module.css";
 
@@ -13,9 +14,8 @@ export default function ScheduleFormPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
-  const participationDays = startDate && endDate
-    ? Math.floor((Date.parse(`${endDate}T00:00:00Z`) - Date.parse(`${startDate}T00:00:00Z`)) / 86_400_000) + 1
-    : null;
+  const [saveError, setSaveError] = useState("");
+  const participationDays = getParticipationDays(startDate, endDate);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("schedule");
@@ -34,7 +34,12 @@ export default function ScheduleFormPage() {
   }, []);
 
   function handleSave() {
-    saveSchedule({ expoName, startDate, endDate, location }, scheduleId);
+    const schedule = saveSchedule({ expoName, startDate, endDate, location }, scheduleId);
+    if (!schedule) {
+      setSaveError("저장하지 못했습니다. 브라우저 저장 공간을 확인한 뒤 다시 시도해주세요.");
+      return;
+    }
+
     router.push("/schedule");
   }
 
@@ -75,6 +80,7 @@ export default function ScheduleFormPage() {
           </div>
         </section>
         <button className={styles.saveButton} type="button" onClick={handleSave}>저장하기</button>
+        {saveError && <p className={styles.saveError} role="alert">{saveError}</p>}
       </section>
     </main>
   );

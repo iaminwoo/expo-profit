@@ -1,29 +1,17 @@
 "use client";
 
 import { getDailySales } from "@/lib/daily-sales-storage";
-import { getSchedules, type ScheduleRecord } from "@/lib/schedule-storage";
+import { calculateDailySales } from "@/lib/calculations";
+import { formatDateRange, formatWon } from "@/lib/format";
+import type { ScheduleRecord } from "@/lib/models";
+import { getSchedules } from "@/lib/schedule-storage";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./page.module.css";
 
-const toNumber = (value: string) => Number(value) || 0;
-const formatWon = (value: number) =>
-  `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
-
-function formatDateRange(schedule: ScheduleRecord) {
-  return (
-    [schedule.startDate, schedule.endDate].filter(Boolean).join(" ~ ") ||
-    "기간 미입력"
-  );
-}
 
 export default function DailySalesListPage() {
-  const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSchedules(getSchedules()), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const [schedules] = useState<ScheduleRecord[]>(getSchedules);
 
   return (
     <main className={styles.page}>
@@ -39,15 +27,7 @@ export default function DailySalesListPage() {
         {schedules.length ? (
           <div className={styles.list}>
             {schedules.map((schedule) => {
-              const totalSales =
-                getDailySales(schedule.id)?.entries.reduce(
-                  (total, entry) =>
-                    total +
-                    toNumber(entry.card ?? entry.sales ?? "") +
-                    toNumber(entry.cash) -
-                    toNumber(entry.refund),
-                  0,
-                ) ?? 0;
+              const totalSales = calculateDailySales(getDailySales(schedule.id)?.entries ?? []);
               return (
                 <Link
                   className={styles.scheduleCard}
@@ -56,7 +36,7 @@ export default function DailySalesListPage() {
                 >
                   <div>
                     <strong>{schedule.expoName || "이름 없는 행사"}</strong>
-                    <span>{formatDateRange(schedule)}</span>
+                    <span>{formatDateRange(schedule.startDate, schedule.endDate)}</span>
                     <span>{schedule.location || "장소 미입력"}</span>
                   </div>
                   <dl>

@@ -138,6 +138,7 @@
   font-weight: 700;
   cursor: pointer;
 }
+.saveError { margin-top: 8px; color: var(--danger); font-size: 0.8125rem; font-weight: 600; }
 .daySection + .daySection {
   margin-top: 28px;
   padding-top: 28px;

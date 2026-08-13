@@ -99,6 +99,8 @@
   font-weight: 600;
 }
 
+.saveError { margin-top: 8px; color: var(--danger); font-size: 0.8125rem; font-weight: 600; }
+
 .card {
   padding: 24px;
 }

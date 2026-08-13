@@ -3,43 +3,24 @@
 import {
   getDailySales,
   saveDailySales,
-  type DailySalesEntry,
 } from "@/lib/daily-sales-storage";
-import { getSchedule, type ScheduleRecord } from "@/lib/schedule-storage";
+import { calculateDailySales, getDatesBetween } from "@/lib/calculations";
+import { formatWon } from "@/lib/format";
+import { emptySales, type DailySalesEntry, type ScheduleRecord } from "@/lib/models";
+import { getSchedule } from "@/lib/schedule-storage";
+import { DailySalesEntrySection } from "@/components/daily-sales-entry";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
-const toNumber = (value: string) => Number(value) || 0;
-const formatWon = (value: number) =>
-  `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
-
-function getDates(startDate: string, endDate: string) {
-  if (!startDate || !endDate || startDate > endDate) return [];
-  const dates: string[] = [];
-  const cursor = new Date(`${startDate}T00:00:00Z`);
-  const last = new Date(`${endDate}T00:00:00Z`);
-  while (cursor <= last) {
-    dates.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return dates;
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }).format(new Date(`${date}T00:00:00`));
-}
 
 export default function DailySalesFormPage() {
   const router = useRouter();
   const [schedule, setSchedule] = useState<ScheduleRecord>();
   const [entries, setEntries] = useState<DailySalesEntry[]>([]);
   const [openDates, setOpenDates] = useState<Record<string, boolean>>({});
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     const scheduleId = new URLSearchParams(window.location.search).get(
@@ -49,7 +30,7 @@ export default function DailySalesFormPage() {
     const savedSchedule = getSchedule(scheduleId);
     if (!savedSchedule) return;
     const savedSales = getDailySales(scheduleId);
-    const dates = getDates(savedSchedule.startDate, savedSchedule.endDate);
+    const dates = getDatesBetween(savedSchedule.startDate, savedSchedule.endDate);
     const salesByDate = new Map(
       savedSales?.entries.map((entry) => [entry.date, entry]),
     );
@@ -58,12 +39,7 @@ export default function DailySalesFormPage() {
       setEntries(
         dates.map((date) => {
           const savedEntry = salesByDate.get(date);
-          return {
-            date,
-            card: savedEntry?.card ?? savedEntry?.sales ?? "",
-            cash: savedEntry?.cash ?? "",
-            refund: savedEntry?.refund ?? "",
-          };
+          return { date, ...(savedEntry ?? emptySales) };
         }),
       );
     }, 0);
@@ -72,7 +48,11 @@ export default function DailySalesFormPage() {
 
   function handleSave() {
     if (!schedule) return;
-    saveDailySales(schedule.id, entries);
+    if (!saveDailySales(schedule.id, entries)) {
+      setSaveError("저장하지 못했습니다. 브라우저 저장 공간을 확인한 뒤 다시 시도해주세요.");
+      return;
+    }
+
     router.push("/daily-sales");
   }
 
@@ -92,11 +72,7 @@ export default function DailySalesFormPage() {
     );
   }
 
-  const totalSales = entries.reduce(
-    (total, entry) =>
-      total + toNumber(entry.card) + toNumber(entry.cash) - toNumber(entry.refund),
-    0,
-  );
+  const totalSales = calculateDailySales(entries);
 
   return (
     <main className={styles.page}>
@@ -120,76 +96,13 @@ export default function DailySalesFormPage() {
         <section className={styles.card}>
           <h2>날짜별 매출</h2>
           {entries.length ? (
-            entries.map((entry, index) => {
-              const dailySales =
-                toNumber(entry.card) + toNumber(entry.cash) - toNumber(entry.refund);
-
-              return (
-                <section className={styles.daySection} key={entry.date}>
-                  <h3>
-                    <button
-                      className={styles.dayHeading}
-                      type="button"
-                      onClick={() =>
-                        setOpenDates((current) => ({
-                          ...current,
-                          [entry.date]: !(current[entry.date] ?? false),
-                        }))
-                      }
-                      aria-expanded={openDates[entry.date] ?? false}
-                      aria-controls={`details-${entry.date}`}
-                    >
-                      <span>{formatDate(entry.date)}</span>
-                      <span className={(openDates[entry.date] ?? false) ? styles.arrowOpen : styles.arrow}>▾</span>
-                    </button>
-                  </h3>
-                  <div
-                    id={`details-${entry.date}`}
-                    className={`${styles.collapsible} ${(openDates[entry.date] ?? false) ? styles.collapsibleOpen : ""}`}
-                    inert={!(openDates[entry.date] ?? false)}
-                  >
-                    <div className={styles.collapsibleInner}>
-                  {(["card", "cash", "refund"] as const).map((field) => (
-                    <div className={styles.field} key={field}>
-                      <label htmlFor={`${field}-${entry.date}`}>
-                        {field === "card"
-                          ? "카드매출"
-                          : field === "cash"
-                            ? "현금매출"
-                            : "환불/취소"}
-                      </label>
-                      <div className={styles.amountInput}>
-                        <input
-                          id={`${field}-${entry.date}`}
-                          type="number"
-                          min="0"
-                          step="1000"
-                          inputMode="numeric"
-                          value={entry[field]}
-                          onChange={(event) =>
-                            setEntries((current) =>
-                              current.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, [field]: event.target.value }
-                                  : item,
-                              ),
-                            )
-                          }
-                          placeholder="0"
-                        />
-                        <span>원</span>
-                      </div>
-                    </div>
-                  ))}
-                    </div>
-                  </div>
-                  <div className={styles.dailyTotal}>
-                    <span>일일 매출</span>
-                    <strong>{formatWon(dailySales)}</strong>
-                  </div>
-                </section>
-              );
-            })
+            entries.map((entry, index) => <DailySalesEntrySection
+              key={entry.date}
+              entry={entry}
+              isOpen={openDates[entry.date] ?? false}
+              onToggle={() => setOpenDates((current) => ({ ...current, [entry.date]: !(current[entry.date] ?? false) }))}
+              onChange={(field, value) => setEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item))}
+            />)
           ) : (
             <p className={styles.noDates}>행사 기간을 먼저 입력해 주세요.</p>
           )}
@@ -205,6 +118,7 @@ export default function DailySalesFormPage() {
         >
           저장하기
         </button>
+        {saveError && <p className={styles.saveError} role="alert">{saveError}</p>}
       </section>
     </main>
   );

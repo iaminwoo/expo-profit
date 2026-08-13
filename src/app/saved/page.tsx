@@ -1,35 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { getSavedExpos, type ExpoRecord } from "@/lib/expo-storage";
+import { calculateCosts, calculateSales } from "@/lib/calculations";
+import { formatDateRange, formatWon } from "@/lib/format";
+import type { ProfitRecord } from "@/lib/models";
+import { getSavedExpos } from "@/lib/expo-storage";
 import styles from "./page.module.css";
 
-function formatDateRange(startDate: string, endDate: string) {
-  if (!startDate && !endDate) return "기간 미입력";
-  return [startDate, endDate].filter(Boolean).join(" ~ ");
-}
-
-const toNumber = (value: string) => Number(value) || 0;
-const formatWon = (value: number) => `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
-
-function getTotals(expo: ExpoRecord) {
-  const totalSales =
-    toNumber(expo.sales.card) + toNumber(expo.sales.cash) - toNumber(expo.sales.refund);
-  const totalCost =
-    Math.round(totalSales * 0.1) +
-    Object.values(expo.costs).reduce((total, cost) => total + toNumber(cost), 0);
-
+function getTotals(expo: ProfitRecord) {
+  const totalSales = calculateSales(expo.sales);
+  const { totalCost } = calculateCosts(expo.costs, totalSales);
   return { totalSales, totalCost, profit: totalSales - totalCost };
 }
 
 export default function SavedExposPage() {
-  const [expos, setExpos] = useState<ExpoRecord[]>([]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setExpos(getSavedExpos()), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const [expos] = useState<ProfitRecord[]>(getSavedExpos);
 
   return (
     <main className={styles.page}>

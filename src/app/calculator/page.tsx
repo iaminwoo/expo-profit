@@ -1,13 +1,16 @@
 "use client";
 
 import { getDailySales } from "@/lib/daily-sales-storage";
+import { AmountField, CalculatedAmountField } from "@/components/calculator-fields";
+import { SchedulePickerModal } from "@/components/schedule-picker-modal";
 import {
   getSavedExpo,
   saveExpo,
-  type ExpoCosts,
-  type ExpoSales,
 } from "@/lib/expo-storage";
-import { getSchedules, type ScheduleRecord } from "@/lib/schedule-storage";
+import { calculateCosts, calculateSales, getParticipationDays, toNumber } from "@/lib/calculations";
+import { formatWon } from "@/lib/format";
+import { emptyCosts, emptySales, type CostBreakdown, type SalesBreakdown, type ScheduleRecord } from "@/lib/models";
+import { getSchedules } from "@/lib/schedule-storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,108 +33,12 @@ const costFields = [
   { key: "other", label: "기타 비용" },
 ] as const;
 
-const initialSales: ExpoSales = { card: "", cash: "", refund: "" };
-const initialCosts: ExpoCosts = {
-  participationFee: "",
-  transportation: "",
-  accommodation: "",
-  logistics: "",
-  labor: "",
-  paymentFee: "",
-  booth: "",
-  other: "",
-};
-
-const toNumber = (value: string) => Number(value) || 0;
-const formatWon = (value: number) =>
-  `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
-
-function formatReadableWon(value: string) {
-  const amount = toNumber(value);
-  if (!value || amount <= 0) return "";
-
-  const eok = Math.floor(amount / 100_000_000);
-  const afterEok = amount % 100_000_000;
-  const man = Math.floor(afterEok / 10_000);
-  const won = afterEok % 10_000;
-  const parts: string[] = [];
-
-  if (eok) parts.push(`${eok}억`);
-  if (man)
-    parts.push(man >= 100 && man % 100 === 0 ? `${man / 100}백만` : `${man}만`);
-  if (won) parts.push(new Intl.NumberFormat("ko-KR").format(won));
-
-  return `${parts.join(" ")}원`;
-}
+const initialSales = emptySales;
+const initialCosts = emptyCosts;
 
 function resizeTextarea(textarea: HTMLTextAreaElement) {
   textarea.style.height = "auto";
   textarea.style.height = `${textarea.scrollHeight}px`;
-}
-
-type AmountFieldProps = {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  readOnly?: boolean;
-};
-
-function AmountField({
-  id,
-  label,
-  value,
-  onChange,
-  readOnly = false,
-}: AmountFieldProps) {
-  const readableValue = formatReadableWon(value);
-
-  return (
-    <div className={styles.field}>
-      <label htmlFor={id}>{label}</label>
-      <div>
-        <div className={styles.amountInput}>
-          <input
-            id={id}
-            type="number"
-            min="0"
-            step="1000"
-            inputMode="numeric"
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder="0"
-            readOnly={readOnly}
-          />
-          <span>원</span>
-        </div>
-        {readableValue && (
-          <p className={styles.amountReading}>{readableValue}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function CalculatedAmountField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  const amount = toNumber(value);
-
-  return (
-    <div className={styles.field}>
-      <label>{label}</label>
-      <div>
-        <p className={styles.calculatedAmount}>{formatWon(amount)}</p>
-        {amount > 0 && (
-          <p className={styles.amountReading}>{formatReadableWon(value)}</p>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export default function Home() {
@@ -140,8 +47,8 @@ export default function Home() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
-  const [sales, setSales] = useState(initialSales);
-  const [costs, setCosts] = useState(initialCosts);
+  const [sales, setSales] = useState<SalesBreakdown>(initialSales);
+  const [costs, setCosts] = useState<CostBreakdown>(initialCosts);
   const [notes, setNotes] = useState("");
   const [isSalesOpen, setIsSalesOpen] = useState(true);
   const [isCostsOpen, setIsCostsOpen] = useState(true);
@@ -149,6 +56,7 @@ export default function Home() {
   const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
   const [scheduleId, setScheduleId] = useState<string>();
   const [isScheduleSelected, setIsScheduleSelected] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -174,24 +82,14 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const totalSales =
-    toNumber(sales.card) + toNumber(sales.cash) - toNumber(sales.refund);
-  const costOfGoods = Math.round(totalSales * 0.1);
-  const totalCost = costFields.reduce(
-    (total, field) => total + toNumber(costs[field.key]),
-    costOfGoods,
-  );
+  const totalSales = calculateSales(sales);
+  const { costOfGoods, totalCost } = calculateCosts(costs, totalSales);
   const profit = totalSales - totalCost;
-  const participationDays =
-    startDate && endDate
-      ? Math.floor(
-          (Date.parse(`${endDate}T00:00:00Z`) -
-            Date.parse(`${startDate}T00:00:00Z`)) /
-            86_400_000,
-        ) + 1
-      : null;
+  const participationDays = getParticipationDays(startDate, endDate);
 
   function handleSave() {
+    if (!scheduleId) return;
+
     const savedExpo = saveExpo(
       {
         scheduleId,
@@ -205,6 +103,12 @@ export default function Home() {
       },
       expoId,
     );
+    if (!savedExpo) {
+      setSaveError("저장하지 못했습니다. 브라우저 저장 공간을 확인한 뒤 다시 시도해주세요.");
+      return;
+    }
+
+    setSaveError("");
     setExpoId(savedExpo.id);
     router.push("/saved");
   }
@@ -216,14 +120,11 @@ export default function Home() {
 
   function selectSchedule(schedule: ScheduleRecord) {
     const dailySales = getDailySales(schedule.id)?.entries ?? [];
-    const scheduleSales = dailySales.reduce(
-      (total, entry) => ({
-        card: total.card + toNumber(entry.card ?? entry.sales ?? ""),
-        cash: total.cash + toNumber(entry.cash),
-        refund: total.refund + toNumber(entry.refund),
-      }),
-      { card: 0, cash: 0, refund: 0 },
-    );
+    const scheduleSales = dailySales.reduce((total, entry) => ({
+      card: total.card + toNumber(entry.card),
+      cash: total.cash + toNumber(entry.cash),
+      refund: total.refund + toNumber(entry.refund),
+    }), { card: 0, cash: 0, refund: 0 });
 
     setExpoId(undefined);
     setScheduleId(schedule.id);
@@ -327,7 +228,7 @@ export default function Home() {
                     {salesFields.map((field) => (
                       <CalculatedAmountField
                         key={field.key}
-                        label={`${field.label}`}
+                        label={`${field.label} (기간 합계)`}
                         value={sales[field.key]}
                       />
                     ))}
@@ -362,22 +263,7 @@ export default function Home() {
                   inert={!isCostsOpen}
                 >
                   <div className={styles.collapsibleInner}>
-                    <div className={styles.field}>
-                      <label>원가 (매출 10%)</label>
-                      <div>
-                        <p
-                          className={styles.calculatedAmount}
-                          aria-live="polite"
-                        >
-                          {formatWon(costOfGoods)}
-                        </p>
-                        {costOfGoods > 0 && (
-                          <p className={styles.amountReading}>
-                            {formatReadableWon(String(costOfGoods))}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    <CalculatedAmountField label="원가 (매출 10%)" value={String(costOfGoods)} />
                     {costFields.map((field) => (
                       <AmountField
                         key={field.key}
@@ -444,61 +330,11 @@ export default function Home() {
               >
                 저장하기
               </button>
+              {saveError && <p className={styles.saveError} role="alert">{saveError}</p>}
             </div>
           </>
         )}
-        {isScheduleModalOpen && (
-          <div
-            className={styles.modalBackdrop}
-            role="presentation"
-            onMouseDown={() => setIsScheduleModalOpen(false)}
-          >
-            <section
-              className={styles.modal}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="schedule-modal-title"
-              onMouseDown={(event) => event.stopPropagation()}
-            >
-              <div className={styles.modalHeader}>
-                <h2 id="schedule-modal-title">박람회 일정 선택</h2>
-                <button
-                  type="button"
-                  className={styles.modalClose}
-                  onClick={() => setIsScheduleModalOpen(false)}
-                  aria-label="닫기"
-                >
-                  ×
-                </button>
-              </div>
-              {schedules.length ? (
-                <div className={styles.scheduleList}>
-                  {schedules.map((schedule) => (
-                    <button
-                      className={styles.scheduleOption}
-                      type="button"
-                      key={schedule.id}
-                      onClick={() => selectSchedule(schedule)}
-                    >
-                      <strong>{schedule.expoName || "이름 없는 행사"}</strong>
-                      <span>
-                        {[schedule.startDate, schedule.endDate]
-                          .filter(Boolean)
-                          .join(" ~ ") || "기간 미입력"}
-                      </span>
-                      <span>{schedule.location || "장소 미입력"}</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.modalEmpty}>
-                  저장된 일정이 없습니다. 일정 생성에서 먼저 행사를 등록해
-                  주세요.
-                </p>
-              )}
-            </section>
-          </div>
-        )}
+        {isScheduleModalOpen && <SchedulePickerModal schedules={schedules} onClose={() => setIsScheduleModalOpen(false)} onSelect={selectSchedule} />}
       </section>
     </main>
   );

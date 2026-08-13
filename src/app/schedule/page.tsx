@@ -1,21 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getSchedules, type ScheduleRecord } from "@/lib/schedule-storage";
+import { useState } from "react";
+import { formatDateRange } from "@/lib/format";
+import type { ScheduleRecord } from "@/lib/models";
+import { getSchedules } from "@/lib/schedule-storage";
 import styles from "./page.module.css";
 
-function formatDateRange(schedule: ScheduleRecord) {
-  return [schedule.startDate, schedule.endDate].filter(Boolean).join(" ~ ") || "기간 미입력";
-}
-
 export default function ScheduleListPage() {
-  const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSchedules(getSchedules()), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const [schedules] = useState<ScheduleRecord[]>(getSchedules);
 
   return (
     <main className={styles.page}>
@@ -31,7 +24,7 @@ export default function ScheduleListPage() {
             {schedules.map((schedule) => (
               <Link className={styles.scheduleCard} href={`/schedule/new?schedule=${schedule.id}`} key={schedule.id}>
                 <strong>{schedule.expoName || "이름 없는 행사"}</strong>
-                <span>{formatDateRange(schedule)}</span>
+                <span>{formatDateRange(schedule.startDate, schedule.endDate)}</span>
                 <span>{schedule.location || "장소 미입력"}</span>
               </Link>
             ))}
