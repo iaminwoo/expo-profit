@@ -51,10 +51,10 @@
 
 .card,
 .result {
-  border: 1px solid #dfe6de;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgb(31 71 37 / 5%);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
 }
 
 .saveArea {
@@ -66,18 +66,20 @@
   width: 100%;
   padding: 15px 20px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--button-radius);
   color: #ffffff;
-  background: #347a40;
+  background: var(--primary);
   font: inherit;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 150ms ease, transform 150ms ease;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
 }
 
 .saveButton:hover {
-  background: #286b34;
+  background: var(--primary-hover);
 }
 
 .saveButton:active {
@@ -114,6 +116,99 @@
   font-size: 1.1rem;
   font-weight: 750;
   letter-spacing: -0.03em;
+}
+
+.basicHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.schedulePicker {
+  margin-top: 40px;
+}
+
+.scheduleGuide {
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.schedulePicker .scheduleSelectButton {
+  width: 100%;
+  margin: 0;
+  padding: 15px 20px;
+  border-color: #347a40;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+.selectedSchedule {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 20px 0 32px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.scheduleInfo {
+  display: grid;
+  gap: 6px;
+}
+
+.scheduleInfo > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.scheduleInfo strong {
+  color: #26352a;
+  font-size: 0.9rem;
+  word-break: keep-all;
+}
+
+.scheduleInfo span {
+  color: #667268;
+  font-size: 0.8125rem;
+}
+
+.changeScheduleButton {
+  padding: 6px 9px;
+  border: 1px solid #b7d3b9;
+  border-radius: 7px;
+  color: #347a40;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.basicHeading h2,
+.scheduleSelectButton {
+  margin-bottom: 18px;
+}
+
+.scheduleSelectButton {
+  padding: 7px 10px;
+  border: 1px solid #9fc6a3;
+  border-radius: 8px;
+  color: #347a40;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .sectionHeading {
@@ -385,6 +480,78 @@
   color: #c54a42;
 }
 
+.modalBackdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(22 35 24 / 38%);
+}
+.modal {
+  width: min(100%, 520px);
+  max-height: min(80dvh, 640px);
+  overflow: auto;
+  padding: 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgb(20 40 23 / 20%);
+}
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.modalHeader h2 {
+  color: #26352a;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+.modalClose {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  color: #526054;
+  background: #f2f4f1;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.scheduleList {
+  display: grid;
+  gap: 10px;
+}
+.scheduleOption {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #dfe6de;
+  border-radius: 12px;
+  color: inherit;
+  background: #ffffff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.scheduleOption:hover {
+  border-color: #a9cdaa;
+  background: #f9fcf8;
+}
+.scheduleOption strong {
+  color: #26352a;
+  font-size: 0.975rem;
+}
+.scheduleOption span,
+.modalEmpty {
+  color: #667268;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 480px) {
   .page {
     padding: 36px 16px;
@@ -430,5 +597,10 @@
     color: #778178;
     font-size: 0.8125rem;
     font-weight: 400;
+  }
+
+  .scheduleInfo > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
   }
 }

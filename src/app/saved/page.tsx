@@ -11,7 +11,7 @@ function formatDateRange(startDate: string, endDate: string) {
 }
 
 const toNumber = (value: string) => Number(value) || 0;
-const formatWon = (value: number) => `${new Intl.NumberFormat("ko-KR").format(value)}원`;
+const formatWon = (value: number) => `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
 
 function getTotals(expo: ExpoRecord) {
   const totalSales =

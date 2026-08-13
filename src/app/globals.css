@@ -1,6 +1,20 @@
 :root {
   --background: #f7f9f4;
   --foreground: #1d2a20;
+  --surface: #ffffff;
+  --surface-muted: #f2f4f1;
+  --border: #dfe6de;
+  --border-strong: #cfd9cf;
+  --text-muted: #667268;
+  --text-subtle: #778178;
+  --primary: #347a40;
+  --primary-hover: #286b34;
+  --primary-soft: #e8f3e5;
+  --danger: #c54a42;
+  --card-radius: 16px;
+  --input-radius: 10px;
+  --button-radius: 12px;
+  --card-shadow: 0 8px 24px rgb(31 71 37 / 5%);
 }
 
 * {

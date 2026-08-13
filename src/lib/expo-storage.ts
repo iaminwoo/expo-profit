@@ -19,6 +19,7 @@ export type ExpoRecord = {
   id: string;
   createdAt: string;
   updatedAt: string;
+  scheduleId?: string;
   expoName: string;
   startDate: string;
   endDate: string;

@@ -50,10 +50,10 @@
 .expoCard,
 .empty {
   padding: 20px;
-  border: 1px solid #dfe6de;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgb(31 71 37 / 5%);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
 }
 
 .expoCard {

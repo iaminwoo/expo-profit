@@ -33,18 +33,44 @@
   word-break: keep-all;
 }
 
-.actions {
+.groups {
   display: grid;
-  gap: 12px;
+  gap: 36px;
+}
+
+.actionsCard {
   margin-top: 32px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.group h2 {
+  margin-bottom: 10px;
+  color: #26352a;
+  font-size: 1.1rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.group > .primaryButton {
+  width: 100%;
+}
+
+.buttonRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .primaryButton,
 .secondaryButton {
   display: block;
   padding: 15px 20px;
-  border: 1px solid #347a40;
-  border-radius: 12px;
+  border: 1px solid var(--primary);
+  border-radius: var(--button-radius);
   font-size: 1rem;
   font-weight: 700;
   text-align: center;
@@ -53,10 +79,24 @@
 
 .primaryButton {
   color: #ffffff;
-  background: #347a40;
+  background: var(--primary);
 }
 
 .secondaryButton {
-  color: #347a40;
-  background: #ffffff;
+  color: var(--primary);
+  background: var(--surface);
+}
+
+.primaryButton:hover {
+  background: var(--primary-hover);
+}
+
+.secondaryButton:hover {
+  background: var(--primary-soft);
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 28%);
+  outline-offset: 3px;
 }
