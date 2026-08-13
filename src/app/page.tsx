@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ManagementSection } from "@/components/management-section";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -17,7 +18,7 @@ export default function Home() {
               <h3>일정 관리</h3>
               <div className={styles.buttonRow}>
                 <Link className={styles.primaryButton} href="/schedule/new">일정 생성</Link>
-                <Link className={styles.secondaryButton} href="/schedule">일정 확인</Link>
+                <Link className={styles.secondaryButton} href="/schedule">일정 확인/계획</Link>
               </div>
             </section>
             <section className={styles.group}>
@@ -33,10 +34,7 @@ export default function Home() {
                 <Link className={styles.secondaryButton} href="/saved">수익성 목록</Link>
               </div>
             </section>
-            <section className={styles.group}>
-              <h2>관리</h2>
-              <Link className={styles.primaryButton} href="/cost-items">비용 항목 관리</Link>
-            </section>
+            <ManagementSection />
           </div>
         </section>
       </section>

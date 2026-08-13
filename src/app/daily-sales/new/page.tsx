@@ -9,7 +9,6 @@ import { formatWon } from "@/lib/format";
 import { emptySales, type DailySalesEntry, type ScheduleRecord } from "@/lib/models";
 import { getSchedule } from "@/lib/schedule-storage";
 import { DailySalesEntrySection } from "@/components/daily-sales-entry";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -19,7 +18,6 @@ export default function DailySalesFormPage() {
   const router = useRouter();
   const [schedule, setSchedule] = useState<ScheduleRecord>();
   const [entries, setEntries] = useState<DailySalesEntry[]>([]);
-  const [openDates, setOpenDates] = useState<Record<string, boolean>>({});
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
@@ -60,9 +58,6 @@ export default function DailySalesFormPage() {
     return (
       <main className={styles.page}>
         <section className={styles.content}>
-          <Link className={styles.homeLink} href="/">
-            ← 홈으로 돌아가기
-          </Link>
           <div className={styles.empty}>
             기록할 행사를 찾을 수 없습니다. 일별 매출 기록 목록에서 행사를
             선택해 주세요.
@@ -78,9 +73,6 @@ export default function DailySalesFormPage() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <Link className={styles.homeLink} href="/">
-            ← 홈으로 돌아가기
-          </Link>
           <p className={styles.eyebrow}>EXPO DAILY SALES</p>
           <h1>일일 매출 기록</h1>
         </header>
@@ -99,8 +91,6 @@ export default function DailySalesFormPage() {
             entries.map((entry, index) => <DailySalesEntrySection
               key={entry.date}
               entry={entry}
-              isOpen={openDates[entry.date] ?? false}
-              onToggle={() => setOpenDates((current) => ({ ...current, [entry.date]: !(current[entry.date] ?? false) }))}
               onChange={(field, value) => setEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item))}
             />)
           ) : (

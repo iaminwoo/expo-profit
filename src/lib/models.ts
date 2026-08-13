@@ -32,12 +32,11 @@ export type DailySalesRecord = {
   updatedAt: string;
 };
 
-export type ProfitRecord = ScheduleInput & {
+export type ProfitRecord = {
   id: string;
   scheduleId: string;
   createdAt: string;
   updatedAt: string;
-  sales: SalesBreakdown;
   costs: CostBreakdown;
   notes: string;
 };

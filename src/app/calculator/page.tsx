@@ -1,7 +1,7 @@
 "use client";
 
-import { getDailySales } from "@/lib/daily-sales-storage";
 import { AmountField, CalculatedAmountField } from "@/components/calculator-fields";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { SchedulePickerModal } from "@/components/schedule-picker-modal";
 import {
   getSavedExpo,
@@ -12,13 +12,12 @@ import {
   calculateProfitRate,
   calculateSales,
   getParticipationDays,
-  toNumber,
 } from "@/lib/calculations";
 import { formatPercentage, formatWon } from "@/lib/format";
 import { defaultCostItems, getCostItems } from "@/lib/cost-item-storage";
+import { getProfitSource } from "@/lib/profit-source";
 import { emptyCosts, emptySales, type CostBreakdown, type CostItem, type SalesBreakdown, type ScheduleRecord } from "@/lib/models";
 import { getSchedules } from "@/lib/schedule-storage";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -39,20 +38,13 @@ function resizeTextarea(textarea: HTMLTextAreaElement) {
 
 export default function Home() {
   const [expoId, setExpoId] = useState<string>();
-  const [expoName, setExpoName] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [location, setLocation] = useState("");
+  const [schedule, setSchedule] = useState<ScheduleRecord>();
   const [sales, setSales] = useState<SalesBreakdown>(initialSales);
   const [costs, setCosts] = useState<CostBreakdown>(initialCosts);
   const [costItems, setCostItems] = useState<CostItem[]>(defaultCostItems);
   const [notes, setNotes] = useState("");
-  const [isSalesOpen, setIsSalesOpen] = useState(true);
-  const [isCostsOpen, setIsCostsOpen] = useState(true);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
-  const [scheduleId, setScheduleId] = useState<string>();
-  const [isScheduleSelected, setIsScheduleSelected] = useState(false);
   const [saveError, setSaveError] = useState("");
   const router = useRouter();
 
@@ -71,17 +63,15 @@ export default function Home() {
     const expo = getSavedExpo(id);
     if (!expo) return;
 
+    const source = getProfitSource(expo.scheduleId);
+    if (!source.schedule) return;
+
     const timer = window.setTimeout(() => {
       setExpoId(expo.id);
-      setScheduleId(expo.scheduleId);
-      setExpoName(expo.expoName);
-      setStartDate(expo.startDate);
-      setEndDate(expo.endDate);
-      setLocation(expo.location);
-      setSales(expo.sales);
+      setSchedule(source.schedule);
+      setSales(source.sales);
       setCosts(expo.costs);
       setNotes(expo.notes);
-      setIsScheduleSelected(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -92,19 +82,14 @@ export default function Home() {
   const profit = totalSales - totalCost;
   const profitMargin = calculateProfitRate(profit, totalSales);
   const returnOnCost = calculateProfitRate(profit, totalCost);
-  const participationDays = getParticipationDays(startDate, endDate);
+  const participationDays = getParticipationDays(schedule?.startDate ?? "", schedule?.endDate ?? "");
 
   function handleSave() {
-    if (!scheduleId) return;
+    if (!schedule) return;
 
     const savedExpo = saveExpo(
       {
-        scheduleId,
-        expoName,
-        startDate,
-        endDate,
-        location,
-        sales,
+        scheduleId: schedule.id,
         costs,
         notes,
       },
@@ -126,25 +111,13 @@ export default function Home() {
   }
 
   function selectSchedule(schedule: ScheduleRecord) {
-    const dailySales = getDailySales(schedule.id)?.entries ?? [];
-    const scheduleSales = dailySales.reduce((total, entry) => ({
-      card: total.card + toNumber(entry.card),
-      cash: total.cash + toNumber(entry.cash),
-      refund: total.refund + toNumber(entry.refund),
-    }), { card: 0, cash: 0, refund: 0 });
+    const source = getProfitSource(schedule.id);
 
     setExpoId(undefined);
-    setScheduleId(schedule.id);
-    setExpoName(schedule.expoName);
-    setStartDate(schedule.startDate);
-    setEndDate(schedule.endDate);
-    setLocation(schedule.location);
-    setSales({
-      card: String(scheduleSales.card),
-      cash: String(scheduleSales.cash),
-      refund: String(scheduleSales.refund),
-    });
-    setIsScheduleSelected(true);
+    setSchedule(schedule);
+    setSales(source.sales);
+    setCosts(initialCosts);
+    setNotes("");
     setIsScheduleModalOpen(false);
   }
 
@@ -152,17 +125,12 @@ export default function Home() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <div className={styles.headerTop}>
-            <p className={styles.eyebrow}>EXPO PROFIT</p>
-            <Link className={styles.homeLink} href="/">
-              홈으로 돌아가기
-            </Link>
-          </div>
+          <p className={styles.eyebrow}>EXPO PROFIT</p>
           <h1>박람회 수익 계산기</h1>
           <p>박람회 한 번의 매출, 비용, 순이익을 한곳에서 확인해 보세요.</p>
         </header>
 
-        {!isScheduleSelected && (
+        {!schedule && (
           <div className={styles.schedulePicker}>
             <p className={styles.scheduleGuide}>
               비용을 입력하려면 박람회 일정을 선택해주세요.
@@ -177,18 +145,18 @@ export default function Home() {
           </div>
         )}
 
-        {isScheduleSelected && (
+        {schedule && (
           <>
             <section className={styles.selectedSchedule}>
               <div className={styles.scheduleInfo}>
                 <div>
                   <span>박람회명</span>
-                  <strong>{expoName || "이름 없는 행사"}</strong>
+                  <strong>{schedule.expoName || "이름 없는 행사"}</strong>
                 </div>
                 <div>
                   <span>행사기간</span>
                   <strong>
-                    {[startDate, endDate].filter(Boolean).join(" ~ ") ||
+                    {[schedule.startDate, schedule.endDate].filter(Boolean).join(" ~ ") ||
                       "기간 미입력"}
                     {participationDays !== null && participationDays > 0
                       ? ` · ${participationDays}일`
@@ -197,7 +165,7 @@ export default function Home() {
                 </div>
                 <div>
                   <span>장소</span>
-                  <strong>{location || "장소 미입력"}</strong>
+                  <strong>{schedule.location || "장소 미입력"}</strong>
                 </div>
               </div>
               <button
@@ -210,37 +178,19 @@ export default function Home() {
             </section>
             <div className={styles.card}>
               <section className={styles.formSection}>
-                <h2>
-                  <button
-                    className={styles.sectionHeading}
-                    type="button"
-                    onClick={() => setIsSalesOpen((isOpen) => !isOpen)}
-                    aria-expanded={isSalesOpen}
-                    aria-controls="sales-details"
-                  >
-                    <span>매출</span>
-                    <span
-                      className={isSalesOpen ? styles.arrowOpen : styles.arrow}
-                    >
-                      ▾
-                    </span>
-                  </button>
-                </h2>
-                <div
+                <CollapsibleSection
                   id="sales-details"
-                  className={`${styles.collapsible} ${isSalesOpen ? styles.collapsibleOpen : ""}`}
-                  inert={!isSalesOpen}
+                  title="매출"
+                  heading="h2"
                 >
-                  <div className={styles.collapsibleInner}>
-                    {salesFields.map((field) => (
-                      <CalculatedAmountField
-                        key={field.key}
-                        label={field.label}
-                        value={sales[field.key]}
-                      />
-                    ))}
-                  </div>
-                </div>
+                  {salesFields.map((field) => (
+                    <CalculatedAmountField
+                      key={field.key}
+                      label={field.label}
+                      value={sales[field.key]}
+                    />
+                  ))}
+                </CollapsibleSection>
                 <div className={styles.sectionTotal}>
                   <span>총매출</span>
                   <strong>{formatWon(totalSales)}</strong>
@@ -248,45 +198,28 @@ export default function Home() {
               </section>
 
               <section className={styles.formSection}>
-                <h2>
-                  <button
-                    className={styles.sectionHeading}
-                    type="button"
-                    onClick={() => setIsCostsOpen((isOpen) => !isOpen)}
-                    aria-expanded={isCostsOpen}
-                    aria-controls="cost-details"
-                  >
-                    <span>비용</span>
-                    <span
-                      className={isCostsOpen ? styles.arrowOpen : styles.arrow}
-                    >
-                      ▾
-                    </span>
-                  </button>
-                </h2>
-                <div
+                <CollapsibleSection
                   id="cost-details"
-                  className={`${styles.collapsible} ${isCostsOpen ? styles.collapsibleOpen : ""}`}
-                  inert={!isCostsOpen}
+                  title="비용"
+                  heading="h2"
+                  defaultOpen
                 >
-                  <div className={styles.collapsibleInner}>
-                    <CalculatedAmountField label="원가 (매출 10%)" value={String(costOfGoods)} />
-                    {costItems.map((item) => (
-                      <AmountField
-                        key={item.id}
-                        id={item.id}
-                        label={item.name}
-                        value={costs[item.id] ?? ""}
-                        onChange={(value) =>
-                          setCosts((current) => ({
-                            ...current,
-                            [item.id]: value,
-                          }))
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
+                  <CalculatedAmountField label="원가 (매출 10%)" value={String(costOfGoods)} />
+                  {costItems.map((item) => (
+                    <AmountField
+                      key={item.id}
+                      id={item.id}
+                      label={item.name}
+                      value={costs[item.id] ?? ""}
+                      onChange={(value) =>
+                        setCosts((current) => ({
+                          ...current,
+                          [item.id]: value,
+                        }))
+                      }
+                    />
+                  ))}
+                </CollapsibleSection>
                 <div className={styles.sectionTotal}>
                   <span>총비용</span>
                   <strong>{formatWon(totalCost)}</strong>
@@ -311,7 +244,7 @@ export default function Home() {
 
             <section className={styles.result} aria-live="polite">
               <h2 className={styles.resultTitle}>
-                {expoName ? `${expoName} 계산 결과` : "계산 결과"}
+                {schedule.expoName ? `${schedule.expoName} 계산 결과` : "계산 결과"}
               </h2>
               <div className={styles.resultRow}>
                 <span>총매출</span>

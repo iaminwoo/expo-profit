@@ -67,6 +67,23 @@
   width: 100%;
 }
 
+.management {
+  margin-top: 4px;
+  padding-top: 32px;
+  border-top: 1px solid #e0e7df;
+}
+
+.management .managementToggle {
+  color: #397945;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.managementContent {
+  margin-top: 12px;
+}
+
 .buttonRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

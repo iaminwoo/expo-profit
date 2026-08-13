@@ -2,6 +2,7 @@
 
 import { calculateSales } from "@/lib/calculations";
 import { MoneyInput } from "@/components/money-input";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { formatShortDate, formatWon } from "@/lib/format";
 import type { DailySalesEntry } from "@/lib/models";
 import styles from "@/app/daily-sales/new/page.module.css";
@@ -9,8 +10,6 @@ import { useState } from "react";
 
 type Props = {
   entry: DailySalesEntry;
-  isOpen: boolean;
-  onToggle: () => void;
   onChange: (field: keyof Omit<DailySalesEntry, "date">, value: string) => void;
 };
 
@@ -20,7 +19,7 @@ const fields = [
   { key: "refund", label: "환불/취소" },
 ] as const;
 
-export function DailySalesEntrySection({ entry, isOpen, onToggle, onChange }: Props) {
+export function DailySalesEntrySection({ entry, onChange }: Props) {
   const [isCashModalOpen, setIsCashModalOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState("");
   const [cashAmount, setCashAmount] = useState("");
@@ -34,39 +33,36 @@ export function DailySalesEntrySection({ entry, isOpen, onToggle, onChange }: Pr
 
   return (
     <section className={styles.daySection}>
-      <h3>
-        <button className={styles.dayHeading} type="button" onClick={onToggle} aria-expanded={isOpen} aria-controls={`details-${entry.date}`}>
-          <span>{formatShortDate(entry.date)}</span>
-          <span className={isOpen ? styles.arrowOpen : styles.arrow}>▾</span>
-        </button>
-      </h3>
-      <div id={`details-${entry.date}`} className={`${styles.collapsible} ${isOpen ? styles.collapsibleOpen : ""}`} inert={!isOpen}>
-        <div className={styles.collapsibleInner}>
-          {fields.map((field) => (
-            <div className={styles.field} key={field.key}>
-              <label htmlFor={`${field.key}-${entry.date}`}>{field.label}</label>
-              {field.key === "cash" ? (
-                <button
-                  className={styles.cashInputButton}
-                  type="button"
-                  onClick={() => setIsCashModalOpen(true)}
-                >
-                  <span>{entry.cash ? formatWon(Number(entry.cash)) : "현금매출 입력하기"}</span>
-                  <span aria-hidden="true">›</span>
-                </button>
-              ) : (
-                <MoneyInput
-                  id={`${field.key}-${entry.date}`}
-                  value={entry[field.key]}
-                  onChange={(value) => onChange(field.key, value)}
-                  inputClassName={styles.amountInput}
-                  readingClassName={styles.amountReading}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      <CollapsibleSection
+        id={`details-${entry.date}`}
+        title={formatShortDate(entry.date)}
+        heading="h3"
+        openContentClassName={styles.dayContentOpen}
+      >
+        {fields.map((field) => (
+          <div className={styles.field} key={field.key}>
+            <label htmlFor={`${field.key}-${entry.date}`}>{field.label}</label>
+            {field.key === "cash" ? (
+              <button
+                className={styles.cashInputButton}
+                type="button"
+                onClick={() => setIsCashModalOpen(true)}
+              >
+                <span>{entry.cash ? formatWon(Number(entry.cash)) : "현금매출 입력하기"}</span>
+                <span aria-hidden="true">›</span>
+              </button>
+            ) : (
+              <MoneyInput
+                id={`${field.key}-${entry.date}`}
+                value={entry[field.key]}
+                onChange={(value) => onChange(field.key, value)}
+                inputClassName={styles.amountInput}
+                readingClassName={styles.amountReading}
+              />
+            )}
+          </div>
+        ))}
+      </CollapsibleSection>
       <div className={styles.dailyTotal}>
         <span>일일 매출</span>
         <strong>{formatWon(calculateSales(entry))}</strong>

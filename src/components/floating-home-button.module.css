@@ -1,0 +1,40 @@
+.button {
+  position: fixed;
+  z-index: 5;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid #b7d3b9;
+  border-radius: 50%;
+  color: #347a40;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgb(31 71 37 / 14%);
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.button:hover {
+  background: var(--primary-soft);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 28%);
+  outline-offset: 3px;
+}
+
+.button svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}

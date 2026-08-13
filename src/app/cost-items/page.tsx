@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { defaultCostItems, getCostItems, saveCostItems } from "@/lib/cost-item-storage";
@@ -89,7 +88,6 @@ export default function CostItemsPage() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <Link className={styles.homeLink} href="/">← 홈으로 돌아가기</Link>
           <p className={styles.eyebrow}>EXPO SETTINGS</p>
           <h1>비용 항목 관리</h1>
           <p>수익성 계산기에 표시할 비용 항목과 순서를 관리하세요.</p>

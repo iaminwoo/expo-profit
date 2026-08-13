@@ -17,9 +17,6 @@ export default function DailySalesListPage() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <Link className={styles.homeLink} href="/">
-            ← 홈으로 돌아가기
-          </Link>
           <p className={styles.eyebrow}>EXPO DAILY SALES</p>
           <h1>일일 매출 기록</h1>
           <p>행사를 선택해 날짜별 매출을 기록하세요.</p>

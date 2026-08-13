@@ -1,0 +1,51 @@
+.trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.trigger:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 28%);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.arrow,
+.arrowOpen {
+  display: inline-block;
+  color: #637266;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 180ms ease;
+}
+
+.arrow {
+  transform: rotate(-90deg);
+}
+
+.content {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease-out,
+    opacity 120ms ease-out;
+}
+
+.contentOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.inner {
+  min-height: 0;
+  overflow: hidden;
+}

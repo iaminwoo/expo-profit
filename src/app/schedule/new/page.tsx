@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getParticipationDays } from "@/lib/calculations";
@@ -47,7 +46,6 @@ export default function ScheduleFormPage() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <Link className={styles.homeLink} href="/">← 홈으로 돌아가기</Link>
           <p className={styles.eyebrow}>EXPO SCHEDULE</p>
           <h1>{scheduleId ? "일정 수정" : "일정 생성"}</h1>
           <p>박람회 기본 정보를 입력해 일정을 관리하세요.</p>

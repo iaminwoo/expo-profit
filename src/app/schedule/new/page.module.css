@@ -1,7 +1,6 @@
 .page { min-height: 100dvh; padding: 48px 20px; background: #f6f8f5; }
 .content { width: min(100%, 640px); margin: 0 auto; }
 .header { margin-bottom: 28px; }
-.homeLink { display: inline-block; margin-bottom: 28px; color: #397945; font-size: .875rem; font-weight: 600; text-decoration: none; }
 .eyebrow { margin-bottom: 10px; color: #41814d; font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
 .header h1 { color: #1d2a20; font-size: clamp(2rem, 8vw, 2.75rem); line-height: 1.2; letter-spacing: -.05em; }
 .header p:last-child { margin-top: 12px; color: #647067; font-size: .95rem; line-height: 1.6; }

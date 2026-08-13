@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { calculateCosts, calculateSales } from "@/lib/calculations";
+import { calculateCosts } from "@/lib/calculations";
 import { formatDateRange, formatWon } from "@/lib/format";
 import type { ProfitRecord } from "@/lib/models";
 import { getSavedExpos } from "@/lib/expo-storage";
+import { getProfitSource } from "@/lib/profit-source";
 import styles from "./page.module.css";
 
 function getTotals(expo: ProfitRecord) {
-  const totalSales = calculateSales(expo.sales);
+  const { schedule, totalSales } = getProfitSource(expo.scheduleId);
   const { totalCost } = calculateCosts(expo.costs, totalSales);
-  return { totalSales, totalCost, profit: totalSales - totalCost };
+  return { schedule, totalSales, totalCost, profit: totalSales - totalCost };
 }
 
 export default function SavedExposPage() {
@@ -21,7 +22,6 @@ export default function SavedExposPage() {
     <main className={styles.page}>
       <section className={styles.content}>
         <header className={styles.header}>
-          <Link className={styles.backLink} href="/">← 홈으로 돌아가기</Link>
           <p className={styles.eyebrow}>EXPO PROFIT</p>
           <h1>저장된 행사</h1>
           <p>이 브라우저에 저장된 행사 목록입니다.</p>
@@ -30,15 +30,15 @@ export default function SavedExposPage() {
         {expos.length > 0 ? (
           <div className={styles.list}>
             {expos.map((expo) => {
-              const { totalSales, totalCost, profit } = getTotals(expo);
+              const { schedule, totalSales, totalCost, profit } = getTotals(expo);
 
               return (
                 <Link className={styles.expoCard} href={`/calculator?expo=${expo.id}`} key={expo.id}>
                   <div className={styles.expoInfo}>
                     <strong>
-                      {expo.expoName || "이름 없는 행사"} / {expo.location || "장소 미입력"}
+                      {schedule?.expoName || "연결된 일정 없음"} / {schedule?.location || "장소 미입력"}
                     </strong>
-                    <span>{formatDateRange(expo.startDate, expo.endDate)}</span>
+                    <span>{schedule ? formatDateRange(schedule.startDate, schedule.endDate) : "일정을 찾을 수 없습니다."}</span>
                   </div>
                   <dl className={styles.totals}>
                     <div><dt>총매출</dt><dd>{formatWon(totalSales)}</dd></div>

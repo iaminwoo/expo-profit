@@ -10,14 +10,6 @@
 .header {
   margin-bottom: 28px;
 }
-.homeLink {
-  display: inline-block;
-  margin-bottom: 28px;
-  color: #397945;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
-}
 .eyebrow {
   margin-bottom: 10px;
   color: #41814d;
@@ -191,7 +183,7 @@
   font-size: 1rem;
   font-weight: 750;
 }
-.dayHeading { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }.dayHeading:focus-visible { outline: 3px solid rgb(76 155 89 / 28%); outline-offset: 4px; border-radius: 6px; }.arrow, .arrowOpen { display: inline-block; color: #637266; font-size: 1rem; line-height: 1; transition: transform 150ms ease; }.arrow { transform: rotate(-90deg); }.collapsible { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 180ms ease-out, opacity 120ms ease-out; }.collapsibleOpen { grid-template-rows: 1fr; opacity: 1; margin-top: 16px; }.collapsibleInner { min-height: 0; overflow: hidden; }
+.dayContentOpen { margin-top: 16px; }
 .dailyTotal {
   display: flex;
   align-items: baseline;
