@@ -4,15 +4,11 @@ export type SalesBreakdown = {
   refund: string;
 };
 
-export type CostBreakdown = {
-  participationFee: string;
-  transportation: string;
-  accommodation: string;
-  logistics: string;
-  labor: string;
-  paymentFee: string;
-  booth: string;
-  other: string;
+export type CostBreakdown = Record<string, string>;
+
+export type CostItem = {
+  id: string;
+  name: string;
 };
 
 export type ScheduleInput = {
@@ -50,13 +46,4 @@ export type ProfitInput = Omit<ProfitRecord, "id" | "createdAt" | "updatedAt">;
 
 export const emptySales: SalesBreakdown = { card: "", cash: "", refund: "" };
 
-export const emptyCosts: CostBreakdown = {
-  participationFee: "",
-  transportation: "",
-  accommodation: "",
-  logistics: "",
-  labor: "",
-  paymentFee: "",
-  booth: "",
-  other: "",
-};
+export const emptyCosts: CostBreakdown = {};

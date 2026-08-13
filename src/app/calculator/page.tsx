@@ -7,9 +7,16 @@ import {
   getSavedExpo,
   saveExpo,
 } from "@/lib/expo-storage";
-import { calculateCosts, calculateSales, getParticipationDays, toNumber } from "@/lib/calculations";
-import { formatWon } from "@/lib/format";
-import { emptyCosts, emptySales, type CostBreakdown, type SalesBreakdown, type ScheduleRecord } from "@/lib/models";
+import {
+  calculateCosts,
+  calculateProfitRate,
+  calculateSales,
+  getParticipationDays,
+  toNumber,
+} from "@/lib/calculations";
+import { formatPercentage, formatWon } from "@/lib/format";
+import { defaultCostItems, getCostItems } from "@/lib/cost-item-storage";
+import { emptyCosts, emptySales, type CostBreakdown, type CostItem, type SalesBreakdown, type ScheduleRecord } from "@/lib/models";
 import { getSchedules } from "@/lib/schedule-storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,20 +24,9 @@ import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 const salesFields = [
+  { key: "cash", label: "현금매출 (계좌이체 + 현금)" },
   { key: "card", label: "카드매출" },
-  { key: "cash", label: "현금매출" },
   { key: "refund", label: "환불/취소" },
-] as const;
-
-const costFields = [
-  { key: "participationFee", label: "참가비" },
-  { key: "transportation", label: "교통비" },
-  { key: "accommodation", label: "숙박비" },
-  { key: "logistics", label: "주차/화물/주유비" },
-  { key: "labor", label: "인건비" },
-  { key: "paymentFee", label: "결제수수료" },
-  { key: "booth", label: "부스/인쇄물/샘플 비용" },
-  { key: "other", label: "기타 비용" },
 ] as const;
 
 const initialSales = emptySales;
@@ -49,6 +45,7 @@ export default function Home() {
   const [location, setLocation] = useState("");
   const [sales, setSales] = useState<SalesBreakdown>(initialSales);
   const [costs, setCosts] = useState<CostBreakdown>(initialCosts);
+  const [costItems, setCostItems] = useState<CostItem[]>(defaultCostItems);
   const [notes, setNotes] = useState("");
   const [isSalesOpen, setIsSalesOpen] = useState(true);
   const [isCostsOpen, setIsCostsOpen] = useState(true);
@@ -58,6 +55,14 @@ export default function Home() {
   const [isScheduleSelected, setIsScheduleSelected] = useState(false);
   const [saveError, setSaveError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setCostItems(getCostItems());
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("expo");
@@ -85,6 +90,8 @@ export default function Home() {
   const totalSales = calculateSales(sales);
   const { costOfGoods, totalCost } = calculateCosts(costs, totalSales);
   const profit = totalSales - totalCost;
+  const profitMargin = calculateProfitRate(profit, totalSales);
+  const returnOnCost = calculateProfitRate(profit, totalCost);
   const participationDays = getParticipationDays(startDate, endDate);
 
   function handleSave() {
@@ -228,7 +235,7 @@ export default function Home() {
                     {salesFields.map((field) => (
                       <CalculatedAmountField
                         key={field.key}
-                        label={`${field.label} (기간 합계)`}
+                        label={field.label}
                         value={sales[field.key]}
                       />
                     ))}
@@ -264,16 +271,16 @@ export default function Home() {
                 >
                   <div className={styles.collapsibleInner}>
                     <CalculatedAmountField label="원가 (매출 10%)" value={String(costOfGoods)} />
-                    {costFields.map((field) => (
+                    {costItems.map((item) => (
                       <AmountField
-                        key={field.key}
-                        id={field.key}
-                        label={field.label}
-                        value={costs[field.key]}
+                        key={item.id}
+                        id={item.id}
+                        label={item.name}
+                        value={costs[item.id] ?? ""}
                         onChange={(value) =>
                           setCosts((current) => ({
                             ...current,
-                            [field.key]: value,
+                            [item.id]: value,
                           }))
                         }
                       />
@@ -320,6 +327,20 @@ export default function Home() {
                   {formatWon(profit)}
                 </strong>
               </div>
+              <div className={styles.resultRow}>
+                <span>매출이익률</span>
+                <strong>{formatPercentage(profitMargin)}</strong>
+              </div>
+              <p className={styles.rateDescription}>
+                매출 중 실제로 남은 비율입니다.
+              </p>
+              <div className={styles.resultRow}>
+                <span>비용 대비 수익률</span>
+                <strong>{formatPercentage(returnOnCost)}</strong>
+              </div>
+              <p className={styles.rateDescription}>
+                쓴 돈에 비해 번 이익의 비율입니다.
+              </p>
             </section>
 
             <div className={styles.saveArea}>

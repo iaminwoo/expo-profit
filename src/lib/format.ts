@@ -1,6 +1,11 @@
 export const formatWon = (value: number) =>
   `${new Intl.NumberFormat("ko-KR").format(value)} 원`;
 
+export const formatPercentage = (value: number | null) =>
+  value === null ? "-" : `${new Intl.NumberFormat("ko-KR", {
+    maximumFractionDigits: 1,
+  }).format(value)}%`;
+
 export function formatReadableWon(value: string) {
   const amount = Number(value) || 0;
   if (amount <= 0) return "";

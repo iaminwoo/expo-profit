@@ -99,7 +99,12 @@
   font-weight: 600;
 }
 
-.saveError { margin-top: 8px; color: var(--danger); font-size: 0.8125rem; font-weight: 600; }
+.saveError {
+  margin-top: 8px;
+  color: var(--danger);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
 
 .card {
   padding: 24px;
@@ -480,6 +485,24 @@
 
 .profitRow .loss {
   color: #c54a42;
+}
+
+.profitRow + .resultRow {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e7ece6;
+}
+
+.rateDescription {
+  margin-top: 4px;
+  color: #7a857c;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.rateDescription + .resultRow {
+  margin-top: 12px;
 }
 
 .modalBackdrop {

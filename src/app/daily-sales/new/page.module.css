@@ -106,6 +106,48 @@
   font-size: 0.875rem;
   pointer-events: none;
 }
+.amountReading {
+  min-height: 1.25rem;
+  margin-top: 5px;
+  color: #5b8762;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: right;
+}
+.cashInputButton {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #cfd9cf;
+  border-radius: 10px;
+  color: #1d2a20;
+  background: #fff;
+  font: inherit;
+  font-size: 1rem;
+  text-align: right;
+  cursor: pointer;
+}
+.cashInputButton:hover {
+  border-color: #9fc6a3;
+}
+.cashInputButton:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 14%);
+  outline-offset: 2px;
+}
+.cashInputButton span:first-child {
+  flex: 1;
+  color: #1d2a20;
+}
+.cashInputButton span:last-child {
+  margin-left: 12px;
+  color: #778178;
+  font-size: 1.4rem;
+  line-height: 1;
+}
 .total {
   display: flex;
   align-items: baseline;
@@ -162,6 +204,92 @@
 }
 .dailyTotal strong {
   font-size: 1rem;
+}
+.modalBackdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(22 35 24 / 38%);
+}
+.cashModal {
+  width: min(100%, 480px);
+  max-height: min(80dvh, 640px);
+  overflow: auto;
+  padding: 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgb(20 40 23 / 20%);
+}
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.modalHeader h2 {
+  color: #26352a;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+.modalClose {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  color: #526054;
+  background: #f2f4f1;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.modalField + .modalField {
+  margin-top: 16px;
+}
+.modalField label {
+  display: block;
+  margin-bottom: 8px;
+  color: #374039;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.modalField textarea {
+  display: block;
+  width: 100%;
+  min-height: 88px;
+  padding: 12px 14px;
+  border: 1px solid #cfd9cf;
+  border-radius: 10px;
+  outline: none;
+  color: #1d2a20;
+  background: #fff;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.modalField textarea:focus {
+  border-color: #4c9b59;
+  box-shadow: 0 0 0 3px rgb(76 155 89 / 14%);
+}
+.combineButton {
+  width: 100%;
+  margin-top: 24px;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: var(--button-radius);
+  color: #fff;
+  background: var(--primary);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.combineButton:hover {
+  background: var(--primary-hover);
 }
 @media (max-width: 480px) {
   .page {

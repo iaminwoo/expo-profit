@@ -16,6 +16,12 @@ export function calculateDailySales(entries: DailySalesEntry[]) {
   return entries.reduce((total, entry) => total + calculateSales(entry), 0);
 }
 
+export function calculateProfitRate(profit: number, baseAmount: number) {
+  if (baseAmount === 0) return null;
+
+  return (profit / baseAmount) * 100;
+}
+
 export function getDatesBetween(startDate: string, endDate: string) {
   if (!startDate || !endDate || startDate > endDate) return [];
 

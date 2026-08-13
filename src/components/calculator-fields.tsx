@@ -1,3 +1,4 @@
+import { MoneyInput } from "@/components/money-input";
 import { formatReadableWon, formatWon } from "@/lib/format";
 import styles from "@/app/calculator/page.module.css";
 
@@ -9,16 +10,17 @@ type AmountFieldProps = {
 };
 
 export function AmountField({ id, label, value, onChange }: AmountFieldProps) {
-  const readableValue = formatReadableWon(value);
   return (
     <div className={styles.field}>
       <label htmlFor={id}>{label}</label>
       <div>
-        <div className={styles.amountInput}>
-          <input id={id} type="number" min="0" step="1000" inputMode="numeric" value={value} onChange={(event) => onChange(event.target.value)} placeholder="0" />
-          <span>원</span>
-        </div>
-        {readableValue && <p className={styles.amountReading}>{readableValue}</p>}
+        <MoneyInput
+          id={id}
+          value={value}
+          onChange={onChange}
+          inputClassName={styles.amountInput}
+          readingClassName={styles.amountReading}
+        />
       </div>
     </div>
   );
