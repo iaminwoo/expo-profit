@@ -1,0 +1,434 @@
+.page {
+  min-height: 100dvh;
+  padding: 48px 20px;
+  background: #f6f8f5;
+}
+
+.content {
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  color: #41814d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.homeLink {
+  color: #397945;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.header h1 {
+  color: #1d2a20;
+  font-size: clamp(2rem, 8vw, 2.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+}
+
+.header p:last-child {
+  margin-top: 12px;
+  color: #647067;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.card,
+.result {
+  border: 1px solid #dfe6de;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgb(31 71 37 / 5%);
+}
+
+.saveArea {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.saveButton {
+  width: 100%;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 12px;
+  color: #ffffff;
+  background: #347a40;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.saveButton:hover {
+  background: #286b34;
+}
+
+.saveButton:active {
+  transform: translateY(1px);
+}
+
+.saveButton:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 28%);
+  outline-offset: 3px;
+}
+
+.saveMessage {
+  min-height: 1.25rem;
+  margin-top: 8px;
+  color: #397945;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.card {
+  padding: 24px;
+}
+
+.formSection + .formSection {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #e7ece6;
+}
+
+.formSection h2,
+.resultTitle {
+  margin-bottom: 18px;
+  color: #26352a;
+  font-size: 1.1rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.sectionHeading {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.arrow,
+.arrowOpen {
+  display: inline-block;
+  color: #637266;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.arrow {
+  transform: rotate(-90deg);
+}
+
+.sectionHeading:focus-visible {
+  outline: 3px solid rgb(76 155 89 / 28%);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease-out,
+    opacity 120ms ease-out;
+}
+
+.collapsibleOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.collapsibleInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.9fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.field + .field {
+  margin-top: 16px;
+}
+
+.field label {
+  padding-top: 12px;
+  color: #374039;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.field input,
+.field textarea,
+.calculatedAmount {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #cfd9cf;
+  border-radius: 10px;
+  outline: none;
+  color: #1d2a20;
+  background: #ffffff;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.calculatedAmount {
+  text-align: right;
+  color: #637066;
+  background: #f2f4f1;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: #4c9b59;
+  box-shadow: 0 0 0 3px rgb(76 155 89 / 14%);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #a1aaa2;
+}
+
+.amountInput,
+.dayInput {
+  position: relative;
+}
+
+.amountInput input,
+.dayInput input {
+  padding-right: 30px;
+  text-align: right;
+}
+
+.amountInput span,
+.dayInput span {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
+  color: #778178;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.amountReading {
+  min-height: 1.25rem;
+  margin-top: 5px;
+  color: #5b8762;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.dateRange {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.dateRange span {
+  color: #778178;
+}
+
+.dateInputGroup {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dateLabel {
+  display: none;
+}
+
+.dateFieldContent {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dateRange input[type="date"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+
+/* iOS Safari와 iOS Chrome은 모두 WebKit의 날짜 입력 렌더러를 사용합니다. */
+@supports (width: -webkit-fill-available) {
+  .dateRange input[type="date"] {
+    width: -webkit-fill-available;
+  }
+}
+
+.dateRange input[type="date"]::-webkit-date-and-time-value,
+.dateRange input[type="date"]::-webkit-datetime-edit {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.periodDays {
+  margin-top: 6px;
+  color: #5b8762;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.periodDays strong {
+  font-size: 0.9375rem;
+}
+
+.sectionTotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  color: #2d6337;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.sectionTotal strong {
+  font-size: 1.1rem;
+}
+
+.field textarea {
+  display: block;
+  min-height: 48px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.6;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 22px 24px;
+}
+
+.resultRow,
+.profitRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.resultRow + .resultRow {
+  margin-top: 12px;
+}
+
+.resultRow {
+  color: #667268;
+  font-size: 0.9375rem;
+}
+
+.resultRow strong {
+  color: #344237;
+  font-size: 1rem;
+}
+
+.profitRow {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e7ece6;
+  color: #1d2a20;
+  font-weight: 700;
+}
+
+.profitRow strong {
+  color: #287337;
+  font-size: clamp(1.35rem, 5vw, 1.75rem);
+  letter-spacing: -0.04em;
+}
+
+.profitRow .loss {
+  color: #c54a42;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 36px 16px;
+  }
+
+  .card,
+  .result {
+    padding: 20px;
+  }
+
+  .field {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .field label {
+    padding-top: 0;
+  }
+
+  .field + .field {
+    margin-top: 18px;
+  }
+
+  .formSection + .formSection {
+    margin-top: 32px;
+    padding-top: 28px;
+  }
+
+  .dateRange {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .dateRange span {
+    display: none;
+  }
+
+  .dateLabel {
+    display: block;
+    padding-top: 0;
+    margin-bottom: 6px;
+    color: #778178;
+    font-size: 0.8125rem;
+    font-weight: 400;
+  }
+}
