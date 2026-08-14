@@ -1,27 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { defaultCostItems, getCostItems, saveCostItems } from "@/lib/cost-item-storage";
+import { useHydratedState } from "@/hooks/use-hydrated-state";
 import { createId } from "@/lib/local-storage";
 import type { CostItem } from "@/lib/models";
 import styles from "./page.module.css";
 
 export default function CostItemsPage() {
   const router = useRouter();
-  const [items, setItems] = useState<CostItem[]>(defaultCostItems);
+  const { value: items, setValue: setItems, isHydrated } = useHydratedState<CostItem[]>(defaultCostItems, getCostItems);
   const [newItemName, setNewItemName] = useState("");
   const [saveError, setSaveError] = useState("");
   const itemElements = useRef(new Map<string, HTMLDivElement>());
   const previousPositions = useRef(new Map<string, number>());
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setItems(getCostItems());
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
 
   useLayoutEffect(() => {
     if (!previousPositions.current.size) return;
@@ -111,7 +104,7 @@ export default function CostItemsPage() {
             </div>
           </div>
 
-          <div className={styles.list}>
+          {isHydrated && <div className={styles.list}>
             {items.map((item, index) => (
               <div
                 className={styles.item}
@@ -130,7 +123,7 @@ export default function CostItemsPage() {
               </div>
             ))}
             {!items.length && <p className={styles.empty}>표시할 비용 항목이 없습니다.</p>}
-          </div>
+          </div>}
         </section>
         <button className={styles.saveButton} type="button" onClick={handleSave}>저장하기</button>
         {saveError && <p className={styles.saveError} role="alert">{saveError}</p>}

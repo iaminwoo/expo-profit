@@ -16,6 +16,8 @@ export type ScheduleInput = {
   startDate: string;
   endDate: string;
   location: string;
+  estimatedSales: string;
+  estimatedCosts: CostBreakdown;
 };
 
 export type ScheduleRecord = ScheduleInput & {

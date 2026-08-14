@@ -16,6 +16,16 @@ export function calculateDailySales(entries: DailySalesEntry[]) {
   return entries.reduce((total, entry) => total + calculateSales(entry), 0);
 }
 
+export function calculateRemainingDailySales(
+  targetSales: number,
+  previousSales: number,
+  remainingDays: number,
+) {
+  if (remainingDays <= 0) return null;
+
+  return Math.round((targetSales - previousSales) / remainingDays);
+}
+
 export function calculateProfitRate(profit: number, baseAmount: number) {
   if (baseAmount === 0) return null;
 

@@ -1,24 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { formatDateRange } from "@/lib/format";
+import { useHydratedState } from "@/hooks/use-hydrated-state";
 import type { ScheduleRecord } from "@/lib/models";
 import { getSchedules } from "@/lib/schedule-storage";
 import styles from "./page.module.css";
 
 export default function ScheduleListPage() {
-  const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setSchedules(getSchedules());
-      setIsLoaded(true);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
+  const { value: schedules, isHydrated } = useHydratedState<ScheduleRecord[]>([], getSchedules);
 
   return (
     <main className={styles.page}>
@@ -28,7 +18,7 @@ export default function ScheduleListPage() {
           <h1>일정 확인</h1>
           <p>이 브라우저에 저장된 박람회 일정입니다.</p>
         </header>
-        {isLoaded && (schedules.length ? (
+        {isHydrated && (schedules.length ? (
           <div className={styles.list}>
             {schedules.map((schedule) => (
               <Link className={styles.scheduleCard} href={`/schedule/new?schedule=${schedule.id}`} key={schedule.id}>

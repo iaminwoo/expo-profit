@@ -3,7 +3,8 @@ export function readCollection<T>(key: string): T[] {
   try {
     const data: unknown = JSON.parse(window.localStorage.getItem(key) ?? "[]");
     return Array.isArray(data) ? (data as T[]) : [];
-  } catch {
+  } catch (error) {
+    console.error(`localStorage 읽기 실패: ${key}`, error);
     return [];
   }
 }

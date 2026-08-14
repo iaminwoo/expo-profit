@@ -6,14 +6,28 @@ type AmountFieldProps = {
   id: string;
   label: string;
   value: string;
+  expectedValue?: string;
   onChange: (value: string) => void;
 };
 
-export function AmountField({ id, label, value, onChange }: AmountFieldProps) {
+export function AmountField({
+  id,
+  label,
+  value,
+  expectedValue,
+  onChange,
+}: AmountFieldProps) {
+  const expectedAmount = Number(expectedValue) || 0;
+
   return (
     <div className={styles.field}>
       <label htmlFor={id}>{label}</label>
       <div>
+        {expectedAmount > 0 && (
+          <p className={styles.expectedAmount}>
+            예상: {formatReadableWon(expectedValue ?? "")}
+          </p>
+        )}
         <MoneyInput
           id={id}
           value={value}

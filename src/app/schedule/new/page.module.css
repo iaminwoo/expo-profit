@@ -19,6 +19,21 @@
 .dateRange input[type="date"]::-webkit-date-and-time-value, .dateRange input[type="date"]::-webkit-datetime-edit { min-width: 0; max-width: 100%; }
 .periodDays { margin-top: 6px; color: #5b8762; font-size: .8125rem; font-weight: 600; text-align: right; }
 .periodDays strong { font-size: .9375rem; }
+.estimateSection { margin-top: 40px; padding-top: 32px; border-top: 1px solid #e7ece6; }
+.estimateSection h2 { margin-bottom: 18px; color: #26352a; font-size: 1.1rem; font-weight: 750; letter-spacing: -.03em; }
+.amountInput { position: relative; }
+.amountInput input { padding-right: 30px; text-align: right; }
+.amountInput span { position: absolute; top: 50%; right: 9px; transform: translateY(-50%); color: #778178; font-size: .875rem; pointer-events: none; }
+.amountReading { min-height: 1.25rem; margin-top: 5px; color: #5b8762; font-size: .8125rem; font-weight: 600; text-align: right; }
+.estimatedCostHeading { margin: 36px 0 16px; color: #374039; font-size: .9375rem; font-weight: 600; }
+.field > label.goalLabel, .estimatedCostHeading { color: #374039; font-size: .9375rem; font-weight: 800; }
+.calculatedAmount { width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid #c4cec4; border-radius: 10px; color: #4d5a50; background: #e8ece7; font: inherit; font-size: 1rem; font-weight: 600; text-align: right; }
+.estimateTotal, .estimateProfit { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; color: #2d6337; font-size: .9375rem; font-weight: 700; }
+.estimateTotal { margin-top: 20px; padding-top: 18px; border-top: 1px solid #e7ece6; }
+.estimateTotal strong { font-size: 1.1rem; }
+.estimateProfit { margin-top: 16px; padding-top: 16px; border-top: 1px solid #e7ece6; color: #1d2a20; }
+.estimateProfit strong { color: #287337; font-size: clamp(1.2rem, 5vw, 1.5rem); letter-spacing: -.04em; }
+.estimateProfit .loss { color: #c54a42; }
 .saveButton { width: 100%; margin-top: 20px; padding: 15px 20px; border: 0; border-radius: var(--button-radius); color: #fff; background: var(--primary); font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; }
 .saveError { margin-top: 8px; color: var(--danger); font-size: .8125rem; font-weight: 600; }
 @media (max-width: 480px) { .page { padding: 36px 16px; } .card { padding: 20px; } .field { grid-template-columns: 1fr; gap: 8px; } .field > label { padding-top: 0; } .field + .field { margin-top: 18px; } .dateRange { grid-template-columns: 1fr; gap: 10px; } .dateRange > span { display: none; } .dateLabel { display: block; margin-bottom: 6px; color: #778178; font-size: .8125rem; font-weight: 400; } }

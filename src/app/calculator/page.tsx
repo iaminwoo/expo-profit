@@ -3,19 +3,21 @@
 import { AmountField, CalculatedAmountField } from "@/components/calculator-fields";
 import { CollapsibleSection } from "@/components/collapsible-section";
 import { SchedulePickerModal } from "@/components/schedule-picker-modal";
+import { ProfitAnalysisSection } from "@/components/profit-analysis-section";
 import {
   getSavedExpo,
   saveExpo,
 } from "@/lib/expo-storage";
 import {
   calculateCosts,
-  calculateProfitRate,
   calculateSales,
   getParticipationDays,
 } from "@/lib/calculations";
-import { formatPercentage, formatWon } from "@/lib/format";
+import { formatWon } from "@/lib/format";
 import { defaultCostItems, getCostItems } from "@/lib/cost-item-storage";
+import { useHydratedState } from "@/hooks/use-hydrated-state";
 import { getProfitSource } from "@/lib/profit-source";
+import { createProfitAnalysis } from "@/lib/profit-analysis";
 import { emptyCosts, emptySales, type CostBreakdown, type CostItem, type SalesBreakdown, type ScheduleRecord } from "@/lib/models";
 import { getSchedules } from "@/lib/schedule-storage";
 import { useRouter } from "next/navigation";
@@ -41,47 +43,45 @@ export default function Home() {
   const [schedule, setSchedule] = useState<ScheduleRecord>();
   const [sales, setSales] = useState<SalesBreakdown>(initialSales);
   const [costs, setCosts] = useState<CostBreakdown>(initialCosts);
-  const [costItems, setCostItems] = useState<CostItem[]>(defaultCostItems);
+  const { value: costItems } = useHydratedState<CostItem[]>(defaultCostItems, getCostItems);
   const [notes, setNotes] = useState("");
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [schedules, setSchedules] = useState<ScheduleRecord[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [saveError, setSaveError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      setCostItems(getCostItems());
+      const id = new URLSearchParams(window.location.search).get("expo");
+      const expo = id ? getSavedExpo(id) : undefined;
+      const source = expo ? getProfitSource(expo.scheduleId) : undefined;
+
+      if (expo && source?.schedule) {
+        setExpoId(expo.id);
+        setSchedule(source.schedule);
+        setSales(source.sales);
+        setCosts(expo.costs);
+        setNotes(expo.notes);
+      }
+
+      setIsHydrated(true);
     });
 
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("expo");
-    if (!id) return;
-
-    const expo = getSavedExpo(id);
-    if (!expo) return;
-
-    const source = getProfitSource(expo.scheduleId);
-    if (!source.schedule) return;
-
-    const timer = window.setTimeout(() => {
-      setExpoId(expo.id);
-      setSchedule(source.schedule);
-      setSales(source.sales);
-      setCosts(expo.costs);
-      setNotes(expo.notes);
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
   const totalSales = calculateSales(sales);
   const { costOfGoods, totalCost } = calculateCosts(costs, totalSales);
+  const targetSales = Number(schedule?.estimatedSales) || 0;
+  const expectedCost = calculateCosts(schedule?.estimatedCosts ?? emptyCosts, targetSales).totalCost;
   const profit = totalSales - totalCost;
-  const profitMargin = calculateProfitRate(profit, totalSales);
-  const returnOnCost = calculateProfitRate(profit, totalCost);
+  const profitAnalysis = createProfitAnalysis({
+    targetSales,
+    expectedCosts: expectedCost,
+    actualSales: totalSales,
+    actualCosts: totalCost,
+  });
   const participationDays = getParticipationDays(schedule?.startDate ?? "", schedule?.endDate ?? "");
 
   function handleSave() {
@@ -130,7 +130,7 @@ export default function Home() {
           <p>박람회 한 번의 매출, 비용, 순이익을 한곳에서 확인해 보세요.</p>
         </header>
 
-        {!schedule && (
+        {isHydrated && !schedule && (
           <div className={styles.schedulePicker}>
             <p className={styles.scheduleGuide}>
               비용을 입력하려면 박람회 일정을 선택해주세요.
@@ -145,7 +145,7 @@ export default function Home() {
           </div>
         )}
 
-        {schedule && (
+        {isHydrated && schedule && (
           <>
             <section className={styles.selectedSchedule}>
               <div className={styles.scheduleInfo}>
@@ -211,6 +211,7 @@ export default function Home() {
                       id={item.id}
                       label={item.name}
                       value={costs[item.id] ?? ""}
+                      expectedValue={schedule.estimatedCosts?.[item.id]}
                       onChange={(value) =>
                         setCosts((current) => ({
                           ...current,
@@ -260,21 +261,9 @@ export default function Home() {
                   {formatWon(profit)}
                 </strong>
               </div>
-              <div className={styles.resultRow}>
-                <span>매출이익률</span>
-                <strong>{formatPercentage(profitMargin)}</strong>
-              </div>
-              <p className={styles.rateDescription}>
-                매출 중 실제로 남은 비율입니다.
-              </p>
-              <div className={styles.resultRow}>
-                <span>비용 대비 수익률</span>
-                <strong>{formatPercentage(returnOnCost)}</strong>
-              </div>
-              <p className={styles.rateDescription}>
-                쓴 돈에 비해 번 이익의 비율입니다.
-              </p>
             </section>
+
+            <ProfitAnalysisSection analysis={profitAnalysis} />
 
             <div className={styles.saveArea}>
               <button

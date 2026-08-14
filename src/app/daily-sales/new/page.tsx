@@ -4,7 +4,12 @@ import {
   getDailySales,
   saveDailySales,
 } from "@/lib/daily-sales-storage";
-import { calculateDailySales, getDatesBetween } from "@/lib/calculations";
+import {
+  calculateCosts,
+  calculateDailySales,
+  calculateRemainingDailySales,
+  getDatesBetween,
+} from "@/lib/calculations";
 import { formatWon } from "@/lib/format";
 import { emptySales, type DailySalesEntry, type ScheduleRecord } from "@/lib/models";
 import { getSchedule } from "@/lib/schedule-storage";
@@ -18,30 +23,26 @@ export default function DailySalesFormPage() {
   const router = useRouter();
   const [schedule, setSchedule] = useState<ScheduleRecord>();
   const [entries, setEntries] = useState<DailySalesEntry[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    const scheduleId = new URLSearchParams(window.location.search).get(
-      "schedule",
-    );
-    if (!scheduleId) return;
-    const savedSchedule = getSchedule(scheduleId);
-    if (!savedSchedule) return;
-    const savedSales = getDailySales(scheduleId);
-    const dates = getDatesBetween(savedSchedule.startDate, savedSchedule.endDate);
-    const salesByDate = new Map(
-      savedSales?.entries.map((entry) => [entry.date, entry]),
-    );
-    const timer = window.setTimeout(() => {
-      setSchedule(savedSchedule);
-      setEntries(
-        dates.map((date) => {
-          const savedEntry = salesByDate.get(date);
-          return { date, ...(savedEntry ?? emptySales) };
-        }),
-      );
-    }, 0);
-    return () => window.clearTimeout(timer);
+    const frame = window.requestAnimationFrame(() => {
+      const scheduleId = new URLSearchParams(window.location.search).get("schedule");
+      const savedSchedule = scheduleId ? getSchedule(scheduleId) : undefined;
+
+      if (savedSchedule && scheduleId) {
+        const savedSales = getDailySales(scheduleId);
+        const dates = getDatesBetween(savedSchedule.startDate, savedSchedule.endDate);
+        const salesByDate = new Map(savedSales?.entries.map((entry) => [entry.date, entry]));
+        setSchedule(savedSchedule);
+        setEntries(dates.map((date) => ({ date, ...(salesByDate.get(date) ?? emptySales) })));
+      }
+
+      setIsHydrated(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   function handleSave() {
@@ -52,6 +53,10 @@ export default function DailySalesFormPage() {
     }
 
     router.push("/daily-sales");
+  }
+
+  if (!isHydrated) {
+    return <main className={styles.page}><section className={styles.content} /></main>;
   }
 
   if (!schedule) {
@@ -68,6 +73,12 @@ export default function DailySalesFormPage() {
   }
 
   const totalSales = calculateDailySales(entries);
+  const targetSales = Number(schedule.estimatedSales) || 0;
+  const expectedBreakEvenSales = calculateCosts(
+    schedule.estimatedCosts ?? {},
+    targetSales,
+  ).totalCost;
+  const hasSummaryEstimate = targetSales > 0 || expectedBreakEvenSales > 0;
 
   return (
     <main className={styles.page}>
@@ -88,15 +99,47 @@ export default function DailySalesFormPage() {
         <section className={styles.card}>
           <h2>날짜별 매출</h2>
           {entries.length ? (
-            entries.map((entry, index) => <DailySalesEntrySection
-              key={entry.date}
-              entry={entry}
-              onChange={(field, value) => setEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item))}
-            />)
+            entries.map((entry, index) => {
+              const previousSales = calculateDailySales(entries.slice(0, index));
+              const remainingDays = entries.length - index;
+              const dailyTarget = targetSales > 0
+                ? calculateRemainingDailySales(targetSales, previousSales, remainingDays)
+                : null;
+              const dailyBreakEvenSales = expectedBreakEvenSales > 0
+                ? Math.max(
+                  0,
+                  calculateRemainingDailySales(
+                    expectedBreakEvenSales,
+                    previousSales,
+                    remainingDays,
+                  ) ?? 0,
+                )
+                : null;
+
+              return (
+                <DailySalesEntrySection
+                  key={entry.date}
+                  entry={entry}
+                  dailyTarget={dailyTarget}
+                  dailyBreakEvenSales={dailyBreakEvenSales}
+                  onChange={(field, value) => setEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item))}
+                />
+              );
+            })
           ) : (
             <p className={styles.noDates}>행사 기간을 먼저 입력해 주세요.</p>
           )}
-          <div className={styles.total}>
+          {targetSales > 0 && <div className={`${styles.targetSales} ${styles.summaryStart}`}>
+            <span>목표매출</span>
+            <strong>{formatWon(targetSales)}</strong>
+          </div>}
+          {expectedBreakEvenSales > 0 && (
+            <div className={`${styles.breakEvenSales} ${targetSales > 0 ? "" : styles.summaryStart}`}>
+              <span>예상 손익분기 매출</span>
+              <strong>{formatWon(expectedBreakEvenSales)}</strong>
+            </div>
+          )}
+          <div className={hasSummaryEstimate ? styles.total : `${styles.total} ${styles.totalWithoutTarget}`}>
             <span>기간 총매출</span>
             <strong>{formatWon(totalSales)}</strong>
           </div>

@@ -145,15 +145,42 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid #e7ece6;
+  margin-top: 8px;
   color: #2d6337;
   font-size: 0.9375rem;
   font-weight: 700;
 }
 .total strong {
   font-size: 1.1rem;
+}
+.totalWithoutTarget {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e7ece6;
+}
+.targetSales,
+.breakEvenSales,
+.dailyTarget,
+.dailyBreakEvenSales {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  color: #667268;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.summaryStart {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e7ece6;
+}
+.targetSales strong,
+.breakEvenSales strong,
+.dailyTarget strong,
+.dailyBreakEvenSales strong {
+  color: #344237;
+  font-size: 1rem;
 }
 .noDates {
   color: #667268;
@@ -184,6 +211,8 @@
   font-weight: 750;
 }
 .dayContentOpen { margin-top: 16px; }
+.dailyTarget { margin-top: 16px; }
+.dailyBreakEvenSales { margin-top: 8px; }
 .dailyTotal {
   display: flex;
   align-items: baseline;
@@ -194,6 +223,7 @@
   font-size: 0.9375rem;
   font-weight: 700;
 }
+.dailyTotalWithEstimate { margin-top: 8px; }
 .dailyTotal strong {
   font-size: 1rem;
 }

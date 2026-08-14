@@ -6,12 +6,12 @@ import { formatDateRange, formatWon } from "@/lib/format";
 import type { ScheduleRecord } from "@/lib/models";
 import { getSchedules } from "@/lib/schedule-storage";
 import Link from "next/link";
-import { useState } from "react";
+import { useHydratedState } from "@/hooks/use-hydrated-state";
 import styles from "./page.module.css";
 
 
 export default function DailySalesListPage() {
-  const [schedules] = useState<ScheduleRecord[]>(getSchedules);
+  const { value: schedules, isHydrated } = useHydratedState<ScheduleRecord[]>([], getSchedules);
 
   return (
     <main className={styles.page}>
@@ -21,10 +21,11 @@ export default function DailySalesListPage() {
           <h1>일일 매출 기록</h1>
           <p>행사를 선택해 날짜별 매출을 기록하세요.</p>
         </header>
-        {schedules.length ? (
+        {isHydrated && (schedules.length ? (
           <div className={styles.list}>
             {schedules.map((schedule) => {
               const totalSales = calculateDailySales(getDailySales(schedule.id)?.entries ?? []);
+              const targetSales = Number(schedule.estimatedSales) || 0;
               return (
                 <Link
                   className={styles.scheduleCard}
@@ -37,8 +38,16 @@ export default function DailySalesListPage() {
                     <span>{schedule.location || "장소 미입력"}</span>
                   </div>
                   <dl>
-                    <dt>기록 매출</dt>
-                    <dd>{formatWon(totalSales)}</dd>
+                    {targetSales > 0 && (
+                      <div>
+                        <dt>목표 매출</dt>
+                        <dd>{formatWon(targetSales)}</dd>
+                      </div>
+                    )}
+                    <div>
+                      <dt>기록 매출</dt>
+                      <dd>{formatWon(totalSales)}</dd>
+                    </div>
                   </dl>
                 </Link>
               );
@@ -48,7 +57,7 @@ export default function DailySalesListPage() {
           <div className={styles.empty}>
             먼저 일정 생성에서 행사를 등록해 주세요.
           </div>
-        )}
+        ))}
       </section>
     </main>
   );

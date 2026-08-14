@@ -10,6 +10,8 @@ import { useState } from "react";
 
 type Props = {
   entry: DailySalesEntry;
+  dailyTarget: number | null;
+  dailyBreakEvenSales: number | null;
   onChange: (field: keyof Omit<DailySalesEntry, "date">, value: string) => void;
 };
 
@@ -19,7 +21,12 @@ const fields = [
   { key: "refund", label: "환불/취소" },
 ] as const;
 
-export function DailySalesEntrySection({ entry, onChange }: Props) {
+export function DailySalesEntrySection({
+  entry,
+  dailyTarget,
+  dailyBreakEvenSales,
+  onChange,
+}: Props) {
   const [isCashModalOpen, setIsCashModalOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState("");
   const [cashAmount, setCashAmount] = useState("");
@@ -63,8 +70,20 @@ export function DailySalesEntrySection({ entry, onChange }: Props) {
           </div>
         ))}
       </CollapsibleSection>
-      <div className={styles.dailyTotal}>
-        <span>일일 매출</span>
+      {dailyTarget !== null && (
+        <div className={styles.dailyTarget}>
+          <span>목표매출</span>
+          <strong>{formatWon(dailyTarget)}</strong>
+        </div>
+      )}
+      {dailyBreakEvenSales !== null && (
+        <div className={styles.dailyBreakEvenSales}>
+          <span>손익분기 매출</span>
+          <strong>{formatWon(dailyBreakEvenSales)}</strong>
+        </div>
+      )}
+      <div className={`${styles.dailyTotal} ${dailyTarget !== null || dailyBreakEvenSales !== null ? styles.dailyTotalWithEstimate : ""}`}>
+        <span>실제 매출</span>
         <strong>{formatWon(calculateSales(entry))}</strong>
       </div>
       {isCashModalOpen && (

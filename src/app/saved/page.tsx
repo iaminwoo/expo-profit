@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { calculateCosts } from "@/lib/calculations";
 import { formatDateRange, formatWon } from "@/lib/format";
 import type { ProfitRecord } from "@/lib/models";
 import { getSavedExpos } from "@/lib/expo-storage";
 import { getProfitSource } from "@/lib/profit-source";
+import { useHydratedState } from "@/hooks/use-hydrated-state";
 import styles from "./page.module.css";
 
 function getTotals(expo: ProfitRecord) {
@@ -16,7 +16,7 @@ function getTotals(expo: ProfitRecord) {
 }
 
 export default function SavedExposPage() {
-  const [expos] = useState<ProfitRecord[]>(getSavedExpos);
+  const { value: expos, isHydrated } = useHydratedState<ProfitRecord[]>([], getSavedExpos);
 
   return (
     <main className={styles.page}>
@@ -27,7 +27,7 @@ export default function SavedExposPage() {
           <p>이 브라우저에 저장된 행사 목록입니다.</p>
         </header>
 
-        {expos.length > 0 ? (
+        {isHydrated && (expos.length > 0 ? (
           <div className={styles.list}>
             {expos.map((expo) => {
               const { schedule, totalSales, totalCost, profit } = getTotals(expo);
@@ -51,7 +51,7 @@ export default function SavedExposPage() {
           </div>
         ) : (
           <div className={styles.empty}>아직 저장된 행사가 없습니다.</div>
-        )}
+        ))}
       </section>
     </main>
   );
