@@ -4,8 +4,8 @@
   right: max(16px, env(safe-area-inset-right));
   bottom: max(16px, env(safe-area-inset-bottom));
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 66px;
+  height: 66px;
   place-items: center;
   border: 1px solid #b7d3b9;
   border-radius: 50%;
@@ -31,8 +31,8 @@
 }
 
 .button svg {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
